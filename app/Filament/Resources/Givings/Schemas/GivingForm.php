@@ -8,24 +8,13 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\Select;
-use App\Models\GivingType;
 
 class GivingForm
 {
     public static function configure(Schema $schema): Schema
     {
-        $givingType = GivingType::where('name', $this->giving_type)->first();
-
-        if (! $givingType) {
-            throw new \Exception('Giving Type not found');
-        }
-
-
-
         return $schema
             ->components([
-                TextInput::make('name')
-                    ->default(fn($record) => $record?->name),
                 Select::make('church_id')
                     ->label('Church')
                     ->relationship('church', 'name')
@@ -38,20 +27,12 @@ class GivingForm
                     ->searchable()
                     ->preload()
                     ->required(),
-
                 // Select::make('member_id')
                 //     ->label('Member')
                 //     ->relationship('member', 'first_name') // or first_name if no accessor
                 //     ->searchable()
                 //     ->preload()
                 //     ->required(),
-                TextInput::make('custom_giving_type')
-                    ->label('Custom Giving Type')
-                    ->visible(fn($get) => $get('giving_type_id') === 'other')
-                    ->required(fn($get) => $get('giving_type_id') === 'other'),
-
-
-
                 TextInput::make('amount')
                     ->required()
                     ->numeric(),

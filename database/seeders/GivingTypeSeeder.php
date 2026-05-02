@@ -11,7 +11,7 @@ class GivingTypeSeeder extends Seeder
     {
         $types = [
             'District Budget',
-            'Education',
+            'Educational Budget',
             'World Evangelism Fund',
             'Alabaster',
             'Nazarene Youth International',

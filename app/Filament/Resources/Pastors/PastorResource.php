@@ -32,9 +32,12 @@ class PastorResource extends Resource
 
     public static function canCreate(): bool
     {
-        //if this is false, the create action will not be show in the listChurch
-        $user = Auth::user();
-        return $user && $user->role === 'super-admin';
+        $user = filament()->auth()->user();
+
+        return $user && $user->hasAnyRole([
+            'super-admin',
+            'admin',
+        ]);
     }
 
 

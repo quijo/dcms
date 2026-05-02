@@ -79,11 +79,10 @@ class GivingsTable
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->visible(function ($record) {
-                        $user = Auth::user();
+                        $user = filament()->auth()->user();
 
                         return $record->status === 'pending'
-                            && $user
-                            && in_array($user->role, [
+                            && $user?->hasAnyRole([
                                 'church-treasurer',
                                 'district-treasurer',
                                 'super-admin',

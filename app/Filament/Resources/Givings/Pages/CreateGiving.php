@@ -15,6 +15,10 @@ class CreateGiving extends CreateRecord
     {
         $givingType = GivingType::find($data['giving_type_id']);
 
+        if (! $givingType) {
+            throw new \Exception('Giving type not found.');
+        }
+
         if ($givingType->name === 'District Budget') {
 
             $amount = $data['amount'];

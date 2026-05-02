@@ -3,12 +3,11 @@
 namespace App\Filament\Pages;
 
 use App\Models\Giving;
-use App\Models\User;
 use BackedEnum;
-use Filament\Pages\Page;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use UnitEnum;
+use Filament\Pages\Page;
+use Illuminate\Support\Facades\Auth;
 
 class GivingReport extends Page
 {
@@ -22,13 +21,13 @@ class GivingReport extends Page
 
     public static function canView(): bool
     {
-        $user = Auth::user();
+        $user = filament()->auth()->user();
 
-        if (! $user instanceof User) {
-            return false;
-        }
-
-        return $user->hasRole(['super-admin', 'church-treasurer', 'district-treasurer']) || $user->can('view giving reports');
+        return $user && $user->hasAnyRole([
+            'super-admin',
+            'church-treasurer',
+            'district-treasurer',
+        ]);
     }
 
     public function getViewData(): array
@@ -50,16 +49,9 @@ class GivingReport extends Page
 
     public static function canAccess(): bool
     {
-        $user = Auth::user();
-
-        if (! $user instanceof User) {
-            return false;
-        }
-
-        return in_array($user->role, [
+        return filament()->auth()->user()?->hasAnyRole([
             'super-admin',
             'district-treasurer',
-            'district-superintendent',
-        ]);
+        ]) ?? false;
     }
 }

@@ -32,7 +32,7 @@ class GivingForm
                     ->relationship('member', 'first_name') // or first_name if no accessor
                     ->searchable()
                     ->preload()
-                    ->required(),
+                    ->nullable(),
                 TextInput::make('amount')
                     ->required()
                     ->numeric(),

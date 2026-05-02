@@ -6,6 +6,8 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
 
 class PastorForm
 {
@@ -60,6 +62,18 @@ class PastorForm
                     ])
                     ->default('Assigned')
                     ->required(),
+                TextColumn::make('type')
+                    ->badge()
+                    ->color('primary'),
+                IconColumn::make('ordain')
+                    ->boolean()
+                    ->label('Ordained'),
+                IconColumn::make('district_license')
+                    ->boolean()
+                    ->label('District Licensed'),
+                IconColumn::make('local_license')
+                    ->boolean()
+                    ->label('Local Licensed')
             ]);
     }
 }

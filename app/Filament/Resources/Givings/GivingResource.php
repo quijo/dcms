@@ -15,6 +15,8 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use App\Filament\Widgets\DistrictBudgetStats;
+use Illuminate\Support\Facades\Auth;
 
 class GivingResource extends Resource
 {
@@ -44,6 +46,72 @@ class GivingResource extends Resource
         return [
             //
         ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            DistrictBudgetStats::class,
+        ];
+    }
+
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = Auth::user();
+
+        if (!$user) {
+            return $query;
+        }
+
+        // Super admin can see all
+        if ($user->hasRole('super-admin')) {
+            return $query;
+        }
+
+        // Other users only see their church's givings.
+        $churchId = $user->church_id ?: $user->effective_church_id;
+
+        if ($churchId) {
+            return $query->where('church_id', $churchId);
+        }
+
+        return $query;
+    }
+
+    public static function canViewAny(): bool
+    {
+        $user = Auth::user();
+        return $user && $user->hasRole(['super-admin', 'church-treasurer', 'district-treasurer']);
+    }
+
+    public static function canCreate(): bool
+    {
+        $user = Auth::user();
+        return $user && $user->hasRole(['super-admin', 'church-treasurer', 'district-treasurer']);
+    }
+
+    public static function canEdit($record): bool
+    {
+        $user = Auth::user();
+        return $user && $user->hasRole(['super-admin', 'church-treasurer', 'district-treasurer']);
+    }
+
+    public static function canDelete($record): bool
+    {
+        $user = Auth::user();
+        return $user && $user->hasRole(['super-admin', 'church-treasurer', 'district-treasurer']);
+    }
+
+
+    public static function canAccess(): bool
+    {
+        $user = Auth::user();
+
+        return $user && (
+            $user->hasRole('super-admin') ||
+            $user->hasRole('district-treasurer')
+        );
     }
 
     public static function getPages(): array

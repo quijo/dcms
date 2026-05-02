@@ -20,4 +20,10 @@ class ListChurches extends ListRecords
             CreateAction::make(),
         ];
     }
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            \App\Filament\Widgets\ChurchStats::class,
+        ];
+    }
 }

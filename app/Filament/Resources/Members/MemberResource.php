@@ -15,6 +15,8 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use App\Filament\Widgets\MemberStats;
+use Illuminate\Support\Facades\Auth;
 
 class MemberResource extends Resource
 {
@@ -44,6 +46,55 @@ class MemberResource extends Resource
         return [
             //
         ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            MemberStats::class,
+        ];
+    }
+
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = Auth::user();
+
+        if (!$user) {
+            return $query;
+        }
+
+        // Super admin can see all
+        if ($user->hasRole('super-admin')) {
+            return $query;
+        }
+
+        // Other users only see their church's members.
+        $churchId = $user->church_id ?: $user->effective_church_id;
+
+        if ($churchId) {
+            return $query->where('church_id', $churchId);
+        }
+
+        return $query;
+    }
+
+    public static function canCreate(): bool
+    {
+        $user = Auth::user();
+        return $user && $user->hasRole(['super-admin', 'pastor']);
+    }
+
+    public static function canEdit($record): bool
+    {
+        $user = Auth::user();
+        return $user && $user->hasRole(['super-admin', 'pastor']);
+    }
+
+    public static function canDelete($record): bool
+    {
+        $user = Auth::user();
+        return $user && $user->hasRole(['super-admin', 'pastor']);
     }
 
     public static function getPages(): array

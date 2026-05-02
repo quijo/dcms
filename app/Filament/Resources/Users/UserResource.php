@@ -91,6 +91,14 @@ class UserResource extends Resource
                     'district-secretary' => 'District Secretary',
                 ])
                 ->required(),
+
+            Select::make('church_id')
+                ->label('Church')
+                ->relationship('church', 'name')
+                ->searchable()
+                ->preload()
+                ->nullable()
+                ->visible(fn($get) => in_array($get('role'), ['pastor', 'church-secretary', 'church-treasurer'], true)),
         ]);
     }
 
@@ -101,7 +109,9 @@ class UserResource extends Resource
 
             TextColumn::make('email'),
 
-
+            TextColumn::make('church.name')
+                ->label('Church')
+                ->searchable(),
 
             TextColumn::make('role')
                 ->label('Role')

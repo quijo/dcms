@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Guide: Creating Filament Widgets</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 40px; }
+        h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; margin-top: 30px; }
+        h3 { color: #7f8c8d; }
+        code { background-color: #f8f9fa; padding: 2px 4px; border-radius: 3px; font-family: 'Courier New', monospace; }
+        pre { background-color: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; border: 1px solid #e9ecef; }
+        .highlight { background-color: #fff3cd; padding: 10px; border-left: 4px solid #ffc107; margin: 10px 0; }
+        ul { margin-left: 20px; }
+        li { margin-bottom: 5px; }
+        .footer { margin-top: 50px; border-top: 1px solid #dee2e6; padding-top: 20px; color: #6c757d; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+
+<h1>Complete Guide: Creating Filament Widgets</h1>
+
+<h2>Step 1: Choose Widget Type</h2>
+<p>Filament offers several widget types:</p>
+<ul>
+    <li><strong>StatsOverviewWidget</strong>: Shows key metrics/statistics (most common)</li>
+    <li><strong>ChartWidget</strong>: Displays charts and graphs</li>
+    <li><strong>TableWidget</strong>: Shows data in table format</li>
+    <li><strong>Widget</strong>: Custom widget for any content</li>
+</ul>
+
+<h2>Step 2: Create the Widget Class</h2>
+
+<h3>Option A: Using Artisan (Recommended)</h3>
+<pre><code>php artisan make:filament-widget YourWidgetName</code></pre>
+<p>Then select your widget type from the interactive menu.</p>
+
+<h3>Option B: Manual Creation</h3>
+<p>Create file: <code>app/Filament/Widgets/YourWidgetName.php</code></p>
+
+<h2>Step 3: Implement the Widget</h2>
+
+<h3>For StatsOverviewWidget:</h3>
+<pre><code>&lt;?php
+
+namespace App\Filament\Widgets;
+
+use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+use Filament\Widgets\StatsOverviewWidget\Stat;
+
+class YourWidgetName extends BaseWidget
+{
+    protected function getStats(): array
+    {
+        return [
+            Stat::make('Label', 'value')
+                ->description('Description text')
+                ->descriptionIcon('heroicon-m-icon-name')
+                ->color('success'), // success, primary, warning, danger
+
+            // Add more stats...
+        ];
+    }
+}</code></pre>
+
+<h2>Step 4: Register the Widget</h2>
+
+<h3>Option A: Global Registration (Admin Panel)</h3>
+<p>Add to <code>app/Providers/Filament/AdminPanelProvider.php</code>:</p>
+<pre><code>public function panel(Panel $panel): Panel
+{
+    return $panel
+        ->widgets([
+            YourWidgetName::class,
+        ]);
+}</code></pre>
+
+<h3>Option B: Resource-Specific Registration</h3>
+<p>Add to your Resource class:</p>
+<pre><code>public static function getWidgets(): array
+{
+    return [
+        YourWidgetName::class,
+    ];
+}</code></pre>
+
+<h3>Option C: Page Header Widgets</h3>
+<p>Add to your List page:</p>
+<pre><code>protected function getHeaderWidgets(): array
+{
+    return [
+        YourWidgetName::class,
+    ];
+}</code></pre>
+
+<h2>Step 5: Add Data Logic</h2>
+
+<h3>Example with Model Data:</h3>
+<pre><code>protected function getStats(): array
+{
+    return [
+        Stat::make('Total Users', User::count())
+            ->description('Registered users')
+            ->descriptionIcon('heroicon-m-users')
+            ->color('success'),
+
+        Stat::make('Revenue', '$' . number_format(Order::sum('total'), 2))
+            ->description('Total revenue')
+            ->descriptionIcon('heroicon-m-currency-dollar')
+            ->color('primary'),
+
+        Stat::make('Pending Orders', Order::where('status', 'pending')->count())
+            ->description('Orders awaiting processing')
+            ->descriptionIcon('heroicon-m-clock')
+            ->color('warning'),
+    ];
+}</code></pre>
+
+<h2>Step 6: Customize Appearance</h2>
+
+<h3>Available Stat Properties:</h3>
+<ul>
+    <li><code>->description('text')</code> - Adds subtitle</li>
+    <li><code>->descriptionIcon('heroicon-m-icon')</code> - Adds icon to description</li>
+    <li><code>->color('color')</code> - success, primary, warning, danger, gray</li>
+    <li><code>->icon('heroicon-m-icon')</code> - Main stat icon</li>
+    <li><code>->chart([1, 2, 3, 4])</code> - Simple trend chart</li>
+</ul>
+
+<h2>Step 7: Test and Validate</h2>
+<pre><code># Check syntax
+php -l app/Filament/Widgets/YourWidgetName.php
+
+# Test instantiation
+php artisan tinker --execute="new App\Filament\Widgets\YourWidgetName();"</code></pre>
+
+<h2>Common Issues & Solutions</h2>
+<ol>
+    <li><strong>"Class not found"</strong> → Check namespace is <code>App\Filament\Widgets</code></li>
+    <li><strong>Widget not showing</strong> → Ensure registered in correct location</li>
+    <li><strong>Data not loading</strong> → Check model relationships and queries</li>
+    <li><strong>Styling issues</strong> → Verify color names and icon formats</li>
+</ol>
+
+<h2>Best Practices</h2>
+<ul>
+    <li>Use descriptive names: <code>UserStats</code>, <code>RevenueOverview</code>, <code>OrderAnalytics</code></li>
+    <li>Keep stats relevant to the page/resource</li>
+    <li>Use appropriate colors for different metric types</li>
+    <li>Add meaningful descriptions and icons</li>
+    <li>Consider performance - avoid complex queries in widgets</li>
+</ul>
+
+<h2>Example: Complete UserStats Widget</h2>
+<pre><code>&lt;?php
+
+namespace App\Filament\Widgets;
+
+use App\Models\User;
+use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+use Filament\Widgets\StatsOverviewWidget\Stat;
+
+class UserStats extends BaseWidget
+{
+    protected function getStats(): array
+    {
+        return [
+            Stat::make('Total Users', User::count())
+                ->description('All registered users')
+                ->descriptionIcon('heroicon-m-users')
+                ->color('success'),
+
+            Stat::make('Active Users', User::where('status', 'active')->count())
+                ->description('Currently active')
+                ->descriptionIcon('heroicon-m-user-group')
+                ->color('primary'),
+
+            Stat::make('New This Month', User::whereMonth('created_at', now()->month)->count())
+                ->description('Recent registrations')
+                ->descriptionIcon('heroicon-m-user-plus')
+                ->color('info'),
+        ];
+    }
+}</code></pre>
+
+<div class="footer">
+    <p><em>This guide covers everything you need to create functional Filament widgets!</em></p>
+    <p><strong>Created on:</strong> May 2, 2026<br>
+    <strong>Framework:</strong> Laravel Filament v5</p>
+</div>
+
+</body>
+</html></content>
+<parameter name="filePath">c:\apps\dcms\Filament_Widgets_Guide.html

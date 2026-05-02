@@ -20,6 +20,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DatePicker;
 
+use Illuminate\Support\Facades\Auth;
 
 class PastorResource extends Resource
 {
@@ -28,6 +29,14 @@ class PastorResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    public static function canCreate(): bool
+    {
+        //if this is false, the create action will not be show in the listChurch
+        $user = Auth::user();
+        return $user && $user->role === 'super-admin';
+    }
+
 
     public static function form(Schema $schema): Schema
     {

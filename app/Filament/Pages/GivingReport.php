@@ -7,6 +7,7 @@ use BackedEnum;
 use Illuminate\Support\Facades\DB;
 use UnitEnum;
 use Filament\Pages\Page;
+use Illuminate\Support\Facades\Auth;
 
 class GivingReport extends Page
 {
@@ -17,6 +18,12 @@ class GivingReport extends Page
     protected static string|UnitEnum|null $navigationGroup = 'Reports';
 
     protected string $view = 'filament.pages.giving-report';
+
+    public static function canView(): bool
+    {
+        $user = Auth::user();
+        return $user && ($user->hasRole(['super-admin', 'church-treasurer', 'district-treasurer']) || $user->can('view giving reports'));
+    }
 
     public function getViewData(): array
     {
@@ -33,5 +40,15 @@ class GivingReport extends Page
             ->get();
 
         return compact('totalGivings', 'byType', 'monthly');
+    }
+
+    public static function canAccess(): bool
+    {
+        $user = Auth::user();
+
+        return $user && $user->hasAnyRole([
+            'super-admin',
+            'district-treasurer',
+        ]);
     }
 }

@@ -19,6 +19,7 @@ use Filament\Infolists\Components\TextEntry;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use App\Filament\Widgets\ChurchStats;
 
 class ChurchResource extends Resource
 {
@@ -69,7 +70,10 @@ class ChurchResource extends Resource
         return $user && $user->role === 'super-admin';
     }
 
-
-    //    $user = Auth::user();
-    //     return $user && $user->role === 'super-admin';
+    public static function getWidgets(): array
+    {
+        return [
+            ChurchStats::class,
+        ];
+    }
 }

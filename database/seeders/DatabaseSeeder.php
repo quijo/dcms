@@ -15,6 +15,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call([
+            RolePermissionSeeder::class,
+            ChurchSeeder::class,
+            UserSeeder::class,
+            PastorSeeder::class,
+        ]);
+
         // User::factory(10)->create();
 
         User::factory()->create([

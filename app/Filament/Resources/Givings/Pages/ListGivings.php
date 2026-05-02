@@ -16,4 +16,11 @@ class ListGivings extends ListRecords
             CreateAction::make(),
         ];
     }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            \App\Filament\Widgets\DistrictBudgetStats::class,
+        ];
+    }
 }

@@ -16,4 +16,10 @@ class ListPastors extends ListRecords
             CreateAction::make(),
         ];
     }
+    // protected function getHeaderWidgets(): array
+    // {
+    //     return [
+    //         \App\Livewire\PastorStats::class,
+    //     ];
+    // }
 }

@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             ChurchSeeder::class,
             UserSeeder::class,
             PastorSeeder::class,
+            GivingTypeSeeder::class,
         ]);
 
         // User::factory(10)->create();

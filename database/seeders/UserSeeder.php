@@ -61,5 +61,30 @@ class UserSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
+
+        // District Secretary
+        User::firstOrCreate(
+            ['email' => 'districtsecretary@test.com'],
+            [
+                'name' => 'District Secretary',
+                'password' => Hash::make('password'),
+                'role' => 'district-secretary',
+                'type' => 'district',
+                'church_id' => null,
+                'email_verified_at' => now(),
+            ]
+        );
+        // Local Secretary
+        User::firstOrCreate(
+            ['email' => 'localsecretary@test.com'],
+            [
+                'name' => 'Local Secretary',
+                'password' => Hash::make('password'),
+                'role' => 'local-secretary',
+                'type' => 'local',
+                'church_id' => 1,
+                'email_verified_at' => now(),
+            ]
+        );
     }
 }

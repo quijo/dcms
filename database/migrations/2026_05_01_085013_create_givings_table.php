@@ -33,7 +33,7 @@ return new class extends Migration
             // workflow
             $table->string('status')->default('pending');
             // pending | approved | rejected
-
+            $table->foreignId('fiscal_year_id')->constrained();
             $table->foreignId('approved_by')->nullable(); // district treasurer
             $table->timestamp('approved_at')->nullable();
 

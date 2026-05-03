@@ -10,6 +10,8 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use Filament\Tables\Filters\SelectFilter;
+use App\Models\FiscalYear;
 
 class GivingsTable
 {
@@ -69,9 +71,18 @@ class GivingsTable
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('fiscal_year.name')
+                    ->label('Fiscal Year')
+                    ->sortable()
+                    ->searchable(),
+
             ])
             ->filters([
-                //
+                SelectFilter::make('fiscal_year_id')
+                    ->label('Fiscal Year')
+                    ->relationship('fiscalYear', 'name')
+                    ->searchable()
+                    ->preload(),
             ])
             ->recordActions([
                 Action::make('approve')

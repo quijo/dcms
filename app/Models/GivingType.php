@@ -49,4 +49,9 @@ class GivingType extends Model
     {
         return $this->belongsTo(Church::class);
     }
+
+    public function fiscalYear()
+    {
+        return $this->belongsTo(FiscalYear::class);
+    }
 }

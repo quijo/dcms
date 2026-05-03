@@ -2,12 +2,14 @@
 
 namespace App\Filament\Resources\Givings\Schemas;
 
+// use App\Filament\Resources\Givings\Schemas\FiscalYear;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\Select;
+use App\Models\FiscalYear;
 
 class GivingForm
 {
@@ -18,13 +20,13 @@ class GivingForm
                 Select::make('church_id')
                     ->label('Church')
                     ->relationship('church', 'name')
-                    ->searchable()
+                    // ->searchable()
                     ->preload()
                     ->nullable(),
                 Select::make('giving_type_id')
                     ->label('Giving Type')
                     ->relationship('givingType', 'name')
-                    ->searchable()
+                    // ->searchable()
                     ->preload()
                     ->required(),
                 // Select::make('member_id')
@@ -55,6 +57,14 @@ class GivingForm
                 Textarea::make('remarks')
                     ->default(null)
                     ->columnSpanFull(),
+                // Select::make('fiscal_year_id')
+                //     ->label('Fiscal Year')
+                //     ->options(fn() => FiscalYear::pluck('name', 'id'))
+                //     ->default(fn() => FiscalYear::active()?->id)
+                //     ->required(),
+                TextColumn::make('approver.name')
+                    ->label('Approved By')
+                    ->searchable()
             ]);
     }
 }

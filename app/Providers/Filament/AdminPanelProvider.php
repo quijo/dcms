@@ -40,7 +40,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                \App\Filament\Widgets\PastorStats::class,
+                \App\Filament\Widgets\MemberStats::class,
                 // AccountWidget::class,
                 // FilamentInfoWidget::class,
                 //disable default widgets, we will create our own dashbaord wigets later.

@@ -58,7 +58,7 @@ class MemberResource extends Resource
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
         $query = parent::getEloquentQuery();
-        $user = Auth::user();
+        $user = filament()->auth()->user();
 
         if (!$user) {
             return $query;
@@ -81,19 +81,19 @@ class MemberResource extends Resource
 
     public static function canCreate(): bool
     {
-        $user = Auth::user();
+        $user = filament()->auth()->user();
         return $user && $user->hasRole(['super-admin', 'pastor']);
     }
 
     public static function canEdit($record): bool
     {
-        $user = Auth::user();
+        $user = filament()->auth()->user();
         return $user && $user->hasRole(['super-admin', 'pastor']);
     }
 
     public static function canDelete($record): bool
     {
-        $user = Auth::user();
+        $user = filament()->auth()->user();
         return $user && $user->hasRole(['super-admin', 'pastor']);
     }
 

@@ -28,20 +28,27 @@ class UserResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        $user = Auth::user();
+        $user = filament()->auth()->user();
 
-        if ($user->role === 'super-admin') {
-            return parent::getEloquentQuery();
+        $query = parent::getEloquentQuery();
+
+        if (! $user) {
+            return $query->whereRaw('1 = 0');
         }
 
-        if ($user->role === 'pastor') {
-            return parent::getEloquentQuery()
-                ->where('church_id', $user->church_id);
+        // Super admin sees everything
+        if ($user->hasRole('super-admin')) {
+            return $query;
         }
 
-        return parent::getEloquentQuery()->whereRaw('1 = 0');
+        // Pastor sees only their church
+        if ($user->hasRole('pastor')) {
+            return $query->where('church_id', $user->church_id);
+        }
+
+        // Everyone else sees nothing
+        return $query->whereRaw('1 = 0');
     }
-
 
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-users';
@@ -58,8 +65,7 @@ class UserResource extends Resource
 
     public static function canViewAny(): bool
     {
-        $user = Auth::user();
-        return $user && $user->role === 'super-admin';
+        return filament()->auth()->user()?->hasRole('super-admin') ?? false;
     }
 
     public static function form(Schema $schema): Schema
@@ -113,9 +119,9 @@ class UserResource extends Resource
                 ->label('Church')
                 ->searchable(),
 
-            TextColumn::make('role')
+            TextColumn::make('roles.name')
                 ->label('Role')
-                ->badge(),
+                ->badge()
 
         ])
 

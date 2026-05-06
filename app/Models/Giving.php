@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\FiscalYear;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -79,5 +80,10 @@ class Giving extends Model
     public function approver()
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function fiscalYear()
+    {
+        return $this->belongsTo(FiscalYear::class);
     }
 }

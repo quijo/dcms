@@ -21,8 +21,13 @@ class GivingReport extends Page
 
     public static function canView(): bool
     {
-        $user = Auth::user();
-        return $user && ($user->hasRole(['super-admin', 'church-treasurer', 'district-treasurer']) || $user->can('view giving reports'));
+        $user = filament()->auth()->user();
+
+        return $user && $user->hasAnyRole([
+            'super-admin',
+            'church-treasurer',
+            'district-treasurer',
+        ]);
     }
 
     public function getViewData(): array
@@ -44,11 +49,9 @@ class GivingReport extends Page
 
     public static function canAccess(): bool
     {
-        $user = Auth::user();
-
-        return $user && $user->hasAnyRole([
+        return filament()->auth()->user()?->hasAnyRole([
             'super-admin',
             'district-treasurer',
-        ]);
+        ]) ?? false;
     }
 }

@@ -10,6 +10,8 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use Filament\Tables\Filters\SelectFilter;
+use App\Models\FiscalYear;
 
 class GivingsTable
 {
@@ -69,9 +71,18 @@ class GivingsTable
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('fiscal_year.name')
+                    ->label('Fiscal Year')
+                    ->sortable()
+                    ->searchable(),
+
             ])
             ->filters([
-                //
+                SelectFilter::make('fiscal_year_id')
+                    ->label('Fiscal Year')
+                    ->relationship('fiscalYear', 'name')
+                    ->searchable()
+                    ->preload(),
             ])
             ->recordActions([
                 Action::make('approve')
@@ -79,11 +90,10 @@ class GivingsTable
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->visible(function ($record) {
-                        $user = Auth::user();
+                        $user = filament()->auth()->user();
 
                         return $record->status === 'pending'
-                            && $user
-                            && in_array($user->role, [
+                            && $user?->hasAnyRole([
                                 'church-treasurer',
                                 'district-treasurer',
                                 'super-admin',

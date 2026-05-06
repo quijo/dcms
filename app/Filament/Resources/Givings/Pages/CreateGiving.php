@@ -6,14 +6,42 @@ use App\Filament\Resources\GivingResource;
 use App\Models\Giving;
 use App\Models\GivingType;
 use Filament\Resources\Pages\CreateRecord;
+use App\Models\FiscalYear;
 
 class CreateGiving extends CreateRecord
 {
     protected static string $resource = \App\Filament\Resources\Givings\GivingResource::class;
 
+
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+
+
+        $data['fiscal_year_id'] =
+            FiscalYear::findByDate($data['date'])?->id;
+
+        return $data;
+    }
+
+
+
+
+
+
+
+
+
     protected function handleRecordCreation(array $data): Giving
     {
+        $fiscalYearId =
+            \App\Models\FiscalYear::findByDate($data['date'])?->id;
+
         $givingType = GivingType::find($data['giving_type_id']);
+
+        if (! $givingType) {
+            throw new \Exception('Giving type not found.');
+        }
 
         if ($givingType->name === 'District Budget') {
 
@@ -29,23 +57,29 @@ class CreateGiving extends CreateRecord
 
             Giving::create([
                 ...$data,
+                'fiscal_year_id' => $fiscalYearId,
                 'giving_type_id' => $districtType->id,
                 'amount' => $districtAmount,
             ]);
 
             Giving::create([
                 ...$data,
+                'fiscal_year_id' => $fiscalYearId,
                 'giving_type_id' => $educationType->id,
                 'amount' => $educationAmount,
             ]);
 
             return Giving::create([
                 ...$data,
+                'fiscal_year_id' => $fiscalYearId,
                 'giving_type_id' => $wefType->id,
                 'amount' => $wefAmount,
             ]);
         }
 
-        return Giving::create($data);
+        return Giving::create([
+            ...$data,
+            'fiscal_year_id' => $fiscalYearId,
+        ]);
     }
 }

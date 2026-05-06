@@ -17,6 +17,8 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use App\Filament\Widgets\DistrictBudgetStats;
 use Illuminate\Support\Facades\Auth;
+use Filament\Forms\Components\Select;
+use App\Models\FiscalYear;
 
 class GivingResource extends Resource
 {
@@ -57,26 +59,30 @@ class GivingResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        $query = parent::getEloquentQuery();
-        $user = Auth::user();
+        $user = filament()->auth()->user();
 
-        if (!$user) {
-            return $query;
+        $query = parent::getEloquentQuery();
+
+        if (! $user) {
+            return $query->whereRaw('1 = 0'); // safety: no user = no data
         }
 
-        // Super admin can see all
+        // Super admin sees everything
         if ($user->hasRole('super-admin')) {
             return $query;
         }
 
-        // Other users only see their church's givings.
-        $churchId = $user->church_id ?: $user->effective_church_id;
-
-        if ($churchId) {
-            return $query->where('church_id', $churchId);
+        // District treasurer sees everything (or you can refine later)
+        if ($user->hasRole('district-treasurer')) {
+            return $query;
         }
 
-        return $query;
+        // Church users see only their church
+        if ($user->church_id) {
+            return $query->where('church_id', $user->church_id);
+        }
+
+        return $query->whereRaw('1 = 0'); // no church = no data
     }
 
     public static function canViewAny(): bool
@@ -85,34 +91,36 @@ class GivingResource extends Resource
         return $user && $user->hasRole(['super-admin', 'church-treasurer', 'district-treasurer']);
     }
 
-    public static function canCreate(): bool
+    public static function canAccess(): bool
     {
-        $user = Auth::user();
-        return $user && $user->hasRole(['super-admin', 'church-treasurer', 'district-treasurer']);
+        $user = filament()->auth()->user();
+
+        return $user?->hasRole('super-admin')
+            || $user?->hasRole('district-treasurer');
     }
 
     public static function canEdit($record): bool
     {
-        $user = Auth::user();
+        $user = auth()->user() ?? auth()->guard('web')->user();
         return $user && $user->hasRole(['super-admin', 'church-treasurer', 'district-treasurer']);
     }
 
     public static function canDelete($record): bool
     {
-        $user = Auth::user();
+        $user = auth()->user() ?? auth()->guard('web')->user();
         return $user && $user->hasRole(['super-admin', 'church-treasurer', 'district-treasurer']);
     }
 
 
-    public static function canAccess(): bool
-    {
-        $user = Auth::user();
+    // public static function canAccess(): bool
+    // {
+    //     $user = auth()->user() ?? auth()->guard('web')->user();
 
-        return $user && (
-            $user->hasRole('super-admin') ||
-            $user->hasRole('district-treasurer')
-        );
-    }
+    //     return $user && (
+    //         $user->hasRole('super-admin') ||
+    //         $user->hasRole('district-treasurer')
+    //     );
+    // }
 
     public static function getPages(): array
     {

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Churches;
 
+
+
 use App\Filament\Resources\Churches\Pages\CreateChurch;
 use App\Filament\Resources\Churches\Pages\EditChurch;
 use App\Filament\Resources\Churches\Pages\ListChurches;
@@ -15,11 +17,12 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use Filament\Infolists\Components\TextEntry;
-use Illuminate\Support\Facades\Auth;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
+// use Filament\Infolists\Components\TextEntry;
+// use Illuminate\Support\Facades\Auth;
+// use Filament\Forms\Components\Select;
+// use Filament\Forms\Components\TextInput;
 use App\Filament\Widgets\ChurchStats;
+use Filament\Facades\Filament;
 
 class ChurchResource extends Resource
 {
@@ -65,9 +68,13 @@ class ChurchResource extends Resource
 
     public static function canCreate(): bool
     {
-        //if this is false, the create action will not be show in the listChurch
-        $user = Auth::user();
-        return $user && $user->role === 'super-admin';
+        /** @var \App\Models\User $user */
+        $user = Filament::auth()->user();
+        if ($user->hasRole('admin')) {
+            // Allow admin users to create churches
+            return true;
+        }
+        return $user->hasRole('super-admin');
     }
 
     public static function getWidgets(): array

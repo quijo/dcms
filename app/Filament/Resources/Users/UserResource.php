@@ -20,7 +20,7 @@ use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Pages\ViewUser;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-
+use filament\Facades\Filament;
 
 class UserResource extends Resource
 {
@@ -28,7 +28,10 @@ class UserResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        $user = filament()->auth()->user();
+        // $user = filament()->auth()->user();
+
+        /** @var \App\Models\User $user */
+        $user = Filament::auth()->user();
 
         $query = parent::getEloquentQuery();
 
@@ -65,7 +68,14 @@ class UserResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return filament()->auth()->user()?->hasRole('super-admin') ?? false;
+
+        /** @var \App\Models\User $user */
+        $user = Filament::auth()->user();
+        if ($user->hasRole('admin')) {
+            // Allow admin users to create churches
+            return true;
+        }
+        return $user->hasRole('super-admin');
     }
 
     public static function form(Schema $schema): Schema

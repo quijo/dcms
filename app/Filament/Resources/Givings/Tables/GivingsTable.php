@@ -22,6 +22,7 @@ class GivingsTable
                 TextColumn::make('church.name')
                     ->numeric()
                     ->sortable(),
+
                 TextColumn::make('givingType.name')
                     ->label('Type')
                     ->badge()
@@ -90,7 +91,8 @@ class GivingsTable
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->visible(function ($record) {
-                        $user = filament()->auth()->user();
+                        /** @var \App\Models\User $user */
+                        $user = Filament::auth()->user();
 
                         return $record->status === 'pending'
                             && $user?->hasAnyRole([
@@ -103,7 +105,7 @@ class GivingsTable
                     ->action(function ($record) {
                         $record->update([
                             'status' => 'approved',
-                            'approved_by' => Auth::id(),
+                            'approved_by' => Filament::auth()->id(),
                             'approved_at' => now(),
                         ]);
                     })

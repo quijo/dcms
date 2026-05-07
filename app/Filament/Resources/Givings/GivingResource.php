@@ -19,6 +19,8 @@ use App\Filament\Widgets\DistrictBudgetStats;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Select;
 use App\Models\FiscalYear;
+use Filament\Facades\Filament;
+
 
 class GivingResource extends Resource
 {
@@ -59,55 +61,69 @@ class GivingResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        $user = filament()->auth()->user();
+
 
         $query = parent::getEloquentQuery();
 
-        if (! $user) {
-            return $query->whereRaw('1 = 0'); // safety: no user = no data
+        /** @var \App\Models\User|null $user */
+        $user = Filament::auth()->user();
+
+        if (!$user) {
+            return $query->whereRaw('1 = 0');
         }
 
-        // Super admin sees everything
         if ($user->hasRole('super-admin')) {
             return $query;
         }
 
-        // District treasurer sees everything (or you can refine later)
-        if ($user->hasRole('district-treasurer')) {
-            return $query;
+        // ALWAYS resolve church safely
+        $churchId = $user->church_id ?? $user->effective_church_id;
+
+        if (!$churchId) {
+            return $query->whereRaw('1 = 0');
         }
 
-        // Church users see only their church
-        if ($user->church_id) {
-            return $query->where('church_id', $user->church_id);
-        }
-
-        return $query->whereRaw('1 = 0'); // no church = no data
+        return $query->where('church_id', $churchId);
     }
 
     public static function canViewAny(): bool
     {
-        $user = Auth::user();
-        return $user && $user->hasRole(['super-admin', 'church-treasurer', 'district-treasurer']);
+        /** @var \App\Models\User $user */
+        $user = Filament::auth()->user();
+
+        return $user && $user->hasAnyRole([
+            'super-admin',
+            'district-treasurer',
+            'church-treasurer',
+            'pastor',
+        ]);
     }
 
     public static function canAccess(): bool
     {
-        $user = filament()->auth()->user();
+        /** @var \App\Models\User|null $user */
+        $user = Filament::auth()->user();
 
-        return $user?->hasRole('super-admin')
-            || $user?->hasRole('district-treasurer');
+        return $user && $user->hasAnyRole([
+            'super-admin',
+            'district-treasurer',
+            'church-treasurer',
+            'pastor',
+        ]);
     }
 
-    public static function canEdit($record): bool
+    public static function canEditRecord(Giving $record): bool
     {
-        $user = auth()->user() ?? auth()->guard('web')->user();
+
+        /** @var \App\Models\User $user */
+        $user = Filament::auth()->user();
         return $user && $user->hasRole(['super-admin', 'church-treasurer', 'district-treasurer']);
     }
 
-    public static function canDelete($record): bool
+    public static function canDeleteRecord(Giving $record): bool
     {
-        $user = auth()->user() ?? auth()->guard('web')->user();
+        /** @var \App\Models\User $user */
+        $user = Filament::auth()->user();
         return $user && $user->hasRole(['super-admin', 'church-treasurer', 'district-treasurer']);
     }
 
@@ -130,5 +146,18 @@ class GivingResource extends Resource
             'view' => ViewGiving::route('/{record}'),
             'edit' => EditGiving::route('/{record}/edit'),
         ];
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        /** @var \App\Models\User|null $user */
+        $user = Filament::auth()->user();
+
+        return $user && $user->hasAnyRole([
+            'super-admin',
+            'district-treasurer',
+            'church-treasurer',
+            'pastor',
+        ]);
     }
 }

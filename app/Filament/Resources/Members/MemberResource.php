@@ -16,7 +16,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use App\Filament\Widgets\MemberStats;
-use Illuminate\Support\Facades\Auth;
+use Filament\Facades\Filament;
 
 class MemberResource extends Resource
 {
@@ -58,7 +58,9 @@ class MemberResource extends Resource
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
         $query = parent::getEloquentQuery();
-        $user = filament()->auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Filament::auth()->user();
+
 
         if (!$user) {
             return $query;
@@ -81,19 +83,23 @@ class MemberResource extends Resource
 
     public static function canCreate(): bool
     {
-        $user = filament()->auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Filament::auth()->user();
         return $user && $user->hasRole(['super-admin', 'pastor']);
     }
 
     public static function canEdit($record): bool
     {
-        $user = filament()->auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Filament::auth()->user();
         return $user && $user->hasRole(['super-admin', 'pastor']);
     }
 
     public static function canDelete($record): bool
     {
-        $user = filament()->auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Filament::auth()->user();
+
         return $user && $user->hasRole(['super-admin', 'pastor']);
     }
 

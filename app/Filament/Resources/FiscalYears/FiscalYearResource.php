@@ -15,6 +15,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Filament\Facades\Filament;
 
 class FiscalYearResource extends Resource
 {
@@ -23,6 +24,19 @@ class FiscalYearResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+
+    public static function canViewAny(): bool
+    {
+        /** @var \App\Models\User $user */
+        $user = Filament::auth()->user();
+
+
+        return $user && $user->hasAnyRole([
+            'super-admin',
+            'district-treasurer',
+        ]);
+    }
 
     public static function form(Schema $schema): Schema
     {
